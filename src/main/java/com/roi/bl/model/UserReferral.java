@@ -13,7 +13,7 @@ public class UserReferral extends BaseEntity implements Serializable {
     private Long childuserId;
 
     @Column(name="parent_userids")
-    private Long parentUserIds;
+    private Long parentUserId;
 
     public Long getChilduserId() {
         return childuserId;
@@ -23,11 +23,11 @@ public class UserReferral extends BaseEntity implements Serializable {
         this.childuserId = childuserId;
     }
 
-    public Long getParentUserIds() {
-        return parentUserIds;
+    public Long getParentUserId() {
+        return parentUserId;
     }
 
-    public void setParentUserIds(Long parentUserIds) {
-        this.parentUserIds = parentUserIds;
+    public void setParentUserId(Long parentUserId) {
+        this.parentUserId = parentUserId;
     }
 }

@@ -75,7 +75,7 @@ public class UsersController {
                     if(referredUser!=null){
                         UserReferral userReferral = new UserReferral();
                         userReferral.setChilduserId(id);
-                        userReferral.setParentUserIds(referredUser.getId());
+                        userReferral.setParentUserId(referredUser.getId());
                         Long resposneId = userReferralDAO.create(userReferral);
                         if(resposneId> 0){
                             userDAO.updateReferralCount(user.getReferedBy());

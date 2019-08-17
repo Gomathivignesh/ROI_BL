@@ -5,6 +5,8 @@ import com.roi.bl.model.User;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 
 @Component
 public class UserEntityDAOImpl extends BaseEntityDAOImpl<User> implements UserDAO {
@@ -39,6 +41,11 @@ public class UserEntityDAOImpl extends BaseEntityDAOImpl<User> implements UserDA
     @Override
     public int updateReferralCount(String userEmail){
         return getSession().createSQLQuery("update user set referal_count = referal_count+1 where email= :USEREMAIL").setString("USEREMAIL",userEmail).executeUpdate();
+    }
+
+    @Override
+    public List<User> getChildUserDetails(List<Long> userIds){
+        return getSession().createCriteria(User.class).add(Restrictions.in("id", userIds)).list();
     }
 
 }

@@ -1,21 +1,39 @@
 package com.roi.bl.controller;
 
+import com.roi.bl.dao.UserDAO;
+import com.roi.bl.dao.UserReferralDAO;
+import com.roi.bl.dao.UserWalletDAO;
 import com.roi.bl.data.RefferalData;
+import com.roi.bl.data.UserData;
+import com.roi.bl.model.User;
+import com.roi.bl.model.UserWallet;
 import com.roi.bl.util.EmailUtil;
 import com.roi.bl.util.ResponseUtil;
 import com.roi.bl.util.Security.AES;
+import com.roi.bl.util.TransferType;
+import com.roi.bl.util.UserRole;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
 public class AuthUserController {
+
+    @Autowired
+    private UserDAO userDAO;
+
+    @Autowired
+    private UserWalletDAO userWalletDAO;
+
+    @Autowired
+    private UserReferralDAO userReferralDAO;
 
 
 
@@ -29,7 +47,7 @@ public class AuthUserController {
             System.out.println(data);
             String encryptedData = AES.encryptionUtil(data);
             System.out.println(encryptedData);
-            EmailUtil.sendEmail(refferalData.getToUserEmail(), encryptedData);
+            EmailUtil.sendEmail(refferalData.getToUserEmail(), refferalData.getUser().getEmail() );
             responseUtil.setStatusCode("200");
             responseUtil.setMessage("Email Sent");
             return responseUtil;
@@ -40,4 +58,83 @@ public class AuthUserController {
             return responseUtil;
         }
     }
+
+    @RequestMapping(value = "/activateUser", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseUtil activateUser(@RequestBody User user) {
+        ResponseUtil responseUtil = new ResponseUtil();
+        try{
+            User user1 = userDAO.getUserbyEmail(user.getEmail());
+            //[TODO] user activation yet to done
+            if(user1!=null){
+                UserWallet userWallet = new UserWallet();
+                userWallet.setUserId(user1.getId());
+                userWallet.setAmount(new BigDecimal(0));
+                userWallet.setTransferType(TransferType.INIT.toString());
+                userWallet.setUpdatedDate(new Date());
+                long responseId = userWalletDAO.create(userWallet);
+                if(responseId>0){
+                    responseUtil.setStatusCode("200");
+                    responseUtil.setMessage("user wallet activated");
+                }else{
+                    responseUtil.setStatusCode("500");
+                    responseUtil.setMessage("Error in activating user wallet");
+                }
+                return responseUtil;
+
+            }else{
+                responseUtil.setStatusCode("500");
+                responseUtil.setMessage("user not exist");
+                return responseUtil;
+            }
+
+
+        }catch(Exception e){
+            e.printStackTrace();
+            responseUtil.setStatusCode("250");
+            responseUtil.setMessage("Error in activating user wallet");
+            return responseUtil;
+        }
+
+
+    }
+
+    @RequestMapping(value = "/getUserDetails", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public UserData getUserDetails(@RequestBody User user) {
+        UserData userData = new UserData();
+        List<UserData> childUserDatas = new ArrayList<>();
+        try{
+            User user1 = userDAO.getUserbyEmail(user.getEmail());
+            //[TODO] user activation yet to done
+            if(user1!=null){
+                userData.setUserName(user1.getName());
+                userData.setReferalCount(user1.getReferalCount());
+                userData.setRoleId(user1.getUserRole());
+            }
+            userData.setWalletBalance(userWalletDAO.getBalanceByUserId(user1.getId()));
+
+            List<User> userDetails = userDAO.getChildUserDetails(userReferralDAO.getChilduserIds(user1.getId()));
+            for(User childUser: userDetails){
+                UserData childUserData = new UserData();
+                childUserData.setUserName(childUser.getName());
+                childUserData.setReferalCount(childUser.getReferalCount());
+                childUserData.setRoleId(childUser.getUserRole());
+                childUserData.setWalletBalance(userWalletDAO.getBalanceByUserId(childUser.getId()));
+                childUserDatas.add(childUserData);
+            }
+            userData.setChilduserIds(childUserDatas);
+            return userData;
+        }catch(Exception e){
+            e.printStackTrace();
+            return null;
+        }
+
+
+    }
+
+
+
+
+
 }

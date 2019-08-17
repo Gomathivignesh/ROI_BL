@@ -1,5 +1,7 @@
 package com.roi.bl.util.Security;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
@@ -10,8 +12,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Base64;
-
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class AES implements PasswordEncoder {
     static Cipher cipher;

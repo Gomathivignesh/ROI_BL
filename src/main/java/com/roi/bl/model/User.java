@@ -1,6 +1,9 @@
 package com.roi.bl.model;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.io.Serializable;
 
 @Entity
@@ -39,6 +42,17 @@ public class User extends BaseEntity implements Serializable {
 
     @Column(name="role_id")
     private int userRole;
+
+    @Column(name="referal_count")
+    private int referalCount;
+
+    public int getReferalCount() {
+        return referalCount;
+    }
+
+    public void setReferalCount(int referalCount) {
+        this.referalCount = referalCount;
+    }
 
     public int getUserRole() {
         return userRole;

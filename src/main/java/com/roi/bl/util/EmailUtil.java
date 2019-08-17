@@ -1,8 +1,6 @@
 package com.roi.bl.util;
 
 
-import java.util.Properties;
-
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -10,6 +8,7 @@ import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.util.Properties;
 
 public class EmailUtil {
 
@@ -34,7 +33,7 @@ public class EmailUtil {
             MessagingException {
 
         String emailSubject = "ROI-Tamilnadu";
-        String emailBody = "click here to register ROI-Tamilnadu  www.google.com/"+ referalToken;
+        String emailBody = "click here to register ROI-Tamilnadu\n  http://localhost:4200/signup?id="+ referalToken;
 
         mailSession = Session.getDefaultInstance(emailProperties, null);
         emailMessage = new MimeMessage(mailSession);
