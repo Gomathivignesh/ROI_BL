@@ -6,6 +6,7 @@ import com.roi.bl.model.User;
 import com.roi.bl.model.UserReferral;
 import com.roi.bl.util.ResponseUtil;
 import com.roi.bl.util.Security.AES;
+import com.roi.bl.util.Status;
 import com.roi.bl.util.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -29,9 +30,12 @@ public class UsersController {
         try{
             user.setPassword(AES.encryptionUtil(user.getPassword()));
             User data = userDAO.getUserforLogin(user);
-            if(data!=null){
+            if(data!=null && data.getStatus().equals(Status.INACTIVE.getStatusValue())){
+                responseUtil.setStatusCode("500");
+                responseUtil.setMessage("PAYMENT_PENDING");
+            }else if(data!=null && data.getStatus().equals(Status.ACTIVE.getStatusValue())){
                 responseUtil.setStatusCode("200");
-                responseUtil.setMessage("login successfully");
+                responseUtil.setMessage("Login successfully");
             }
             else{
                 responseUtil.setStatusCode("500");

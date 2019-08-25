@@ -1,10 +1,10 @@
 package com.roi.bl.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import com.roi.bl.util.Status;
+
+import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Set;
 
 @Entity
 @Table(name="user")
@@ -45,6 +45,13 @@ public class User extends BaseEntity implements Serializable {
 
     @Column(name="referal_count")
     private int referalCount;
+
+    @Column(name="status")
+    private Status status;
+
+
+    @OneToMany(mappedBy="user")
+    private Set<Payments> Payments;
 
     public int getReferalCount() {
         return referalCount;
@@ -133,5 +140,13 @@ public class User extends BaseEntity implements Serializable {
 
     public void setPin(String pin) {
         this.pin = pin;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 }

@@ -1,30 +1,37 @@
 package com.roi.bl.controller;
 
+import com.roi.bl.dao.PaymentDAO;
 import com.roi.bl.dao.UserDAO;
 import com.roi.bl.dao.UserReferralDAO;
 import com.roi.bl.dao.UserWalletDAO;
 import com.roi.bl.data.RefferalData;
 import com.roi.bl.data.UserData;
+import com.roi.bl.model.Payments;
 import com.roi.bl.model.User;
 import com.roi.bl.model.UserWallet;
-import com.roi.bl.util.EmailUtil;
-import com.roi.bl.util.ResponseUtil;
+import com.roi.bl.util.*;
 import com.roi.bl.util.Security.AES;
-import com.roi.bl.util.TransferType;
-import com.roi.bl.util.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 @RestController
 @RequestMapping("/user")
 public class AuthUserController {
+
+    private static String UPLOADED_FOLDER = "D://temp//";
 
     @Autowired
     private UserDAO userDAO;
@@ -34,6 +41,9 @@ public class AuthUserController {
 
     @Autowired
     private UserReferralDAO userReferralDAO;
+
+    @Autowired
+    private PaymentDAO paymentDAO;
 
 
 
@@ -99,7 +109,8 @@ public class AuthUserController {
 
     }
 
-    @RequestMapping(value = "/getUserDetails", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+    @RequestMapping(value = "/getUserDetails", method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public UserData getUserDetails(@RequestBody User user) {
         UserData userData = new UserData();
@@ -132,6 +143,63 @@ public class AuthUserController {
 
 
     }
+    @RequestMapping(value = "/initPayment", method = RequestMethod.POST)
+    public ResponseUtil initpayment(@RequestParam("file") MultipartFile uploadfile, String email, String paymentType) {
+        ResponseUtil responseUtil = new ResponseUtil();
+        if (uploadfile.isEmpty()) {
+            responseUtil.setStatusCode("500");
+            responseUtil.setMessage("user not exist");
+            return responseUtil;
+        }
+        try {
+            String filename = uploadfile.getOriginalFilename().replace(uploadfile.getOriginalFilename(), email+"_"+paymentType+"_"+ new SimpleDateFormat("yyyyMddhhmmss").format(new Date()));
+            User userdata = userDAO.getUserbyEmail(email);
+            //[TODO] user activation yet to done
+            if(userdata!=null){
+                saveUploadedFiles(Arrays.asList(uploadfile),filename);
+                Payments payments = new Payments();
+                payments.setFileLocation(UPLOADED_FOLDER+ uploadfile.getOriginalFilename());
+                payments.setPaymentType("ACTIVATION");
+                payments.setStatus(Status.INACTIVE);
+                payments.setUser(userdata);
+                payments.setCreatedBy(userdata.getName());
+                payments.setCreatedDate(new Date());
+                paymentDAO.create(payments);
+            }
+            else{
+                responseUtil.setStatusCode("500");
+                responseUtil.setMessage("user Not exist");
+                return responseUtil;
+            }
+
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            responseUtil.setStatusCode("500");
+            responseUtil.setMessage("saving data failed");
+            return responseUtil;
+        }
+
+        responseUtil.setStatusCode("200");
+        responseUtil.setMessage("Request successfully submitted for approval");
+        return responseUtil;
+    }
+
+    private void saveUploadedFiles(List<MultipartFile> files, String filename) throws IOException {
+
+        for (MultipartFile file : files) {
+            if (file.isEmpty()) {
+                continue; //next pls
+            }
+            byte[] bytes = file.getBytes();
+            Path path = Paths.get(UPLOADED_FOLDER + filename);
+            Files.write(path, bytes);
+
+        }
+
+    }
+
 
 
 
