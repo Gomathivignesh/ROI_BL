@@ -11,6 +11,7 @@ import com.roi.bl.model.User;
 import com.roi.bl.model.UserWallet;
 import com.roi.bl.util.*;
 import com.roi.bl.util.Security.AES;
+import com.roi.bl.util.Security.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -55,9 +56,9 @@ public class AuthUserController {
 
             String data = "ROI-TamilNadu"+ refferalData.getUser().getEmail() + new SimpleDateFormat("yyyy/MM/dd hh:mm:ss").format(new Date());
             System.out.println(data);
-            String encryptedData = AES.encryptionUtil(data);
+            String encryptedData = CommonUtil.encryptData(data);
             System.out.println(encryptedData);
-            EmailUtil.sendEmail(refferalData.getToUserEmail(), refferalData.getUser().getEmail() );
+            EmailUtil.sendEmail(refferalData.getToUserEmail(), encryptedData, "USER_REFERRAL");
             responseUtil.setStatusCode("200");
             responseUtil.setMessage("Email Sent");
             return responseUtil;

@@ -2,6 +2,7 @@ package com.roi.bl.dao.impl;
 
 import com.roi.bl.dao.UserDAO;
 import com.roi.bl.model.User;
+import com.roi.bl.util.Status;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Component;
 
@@ -47,5 +48,11 @@ public class UserEntityDAOImpl extends BaseEntityDAOImpl<User> implements UserDA
     public List<User> getChildUserDetails(List<Long> userIds){
         return getSession().createCriteria(User.class).add(Restrictions.in("id", userIds)).list();
     }
+
+    @Override
+    public List<User> getUserByStatus(Status status) {
+        return getSession().createCriteria(User.class).add(Restrictions.eq("status", status.getStatusValue())).list();
+    }
+
 
 }

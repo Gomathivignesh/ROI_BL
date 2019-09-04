@@ -29,7 +29,7 @@ public class EmailUtil {
 
 
 
-    public static void  createEmailMessage(String toEmailId, String referalToken) throws AddressException,
+    public static void  referralEmailMessage(String toEmailId, String referalToken) throws AddressException,
             MessagingException {
 
         String emailSubject = "ROI-Tamilnadu";
@@ -46,8 +46,31 @@ public class EmailUtil {
 
     }
 
-    public static void sendEmail(String toEmailId, String referalToken) throws AddressException, MessagingException {
-        createEmailMessage(toEmailId, referalToken);
+    public static void  PaymentRequestEmail(String toEmailId, String userSecret) throws AddressException,
+            MessagingException {
+
+        String emailSubject = "ROI-Tamilnadu";
+        String emailBody = "Dear User \n " +
+                "Thanks for register \n"+
+                "Click here  http://localhost:4200/paymentRequestid="+ userSecret + " to complete your registration by upload the payment snapshot";
+
+        mailSession = Session.getDefaultInstance(emailProperties, null);
+        emailMessage = new MimeMessage(mailSession);
+        emailMessage.addRecipient(Message.RecipientType.TO, new InternetAddress(toEmailId));
+
+
+        emailMessage.setSubject(emailSubject);
+        emailMessage.setContent(emailBody, "text/html");//for a html email
+        //emailMessage.setText(emailBody);// for a text email
+
+    }
+
+    public static void sendEmail(String toEmailId, String referalToken, String reason) throws MessagingException {
+        if(reason.equals("USER_REFERRAL"))
+            referralEmailMessage(toEmailId, referalToken);
+
+        else if(reason.equals("PAYMENT_REQUEST"))
+            referralEmailMessage(toEmailId, referalToken);
 
         String emailHost = "smtp.gmail.com";
         String fromUser = "mgomathivignesh";//just the id alone without @gmail.com
