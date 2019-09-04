@@ -126,16 +126,22 @@ public class AuthUserController {
             }
             userData.setWalletBalance(userWalletDAO.getBalanceByUserId(user1.getId()));
 
-            List<User> userDetails = userDAO.getChildUserDetails(userReferralDAO.getChilduserIds(user1.getId()));
-            for(User childUser: userDetails){
-                UserData childUserData = new UserData();
-                childUserData.setUserName(childUser.getName());
-                childUserData.setReferalCount(childUser.getReferalCount());
-                childUserData.setRoleId(childUser.getUserRole());
-                childUserData.setWalletBalance(userWalletDAO.getBalanceByUserId(childUser.getId()));
-                childUserDatas.add(childUserData);
+            List<Long> childIds = userReferralDAO.getChilduserIds(user1.getId());
+            if(childIds.size()>0){
+                List<User> userDetails = userDAO.getChildUserDetails(childIds);
+                for(User childUser: userDetails){
+
+                    UserData childUserData = new UserData();
+                    childUserData.setUserName(childUser.getName());
+                    childUserData.setReferalCount(childUser.getReferalCount());
+                    childUserData.setRoleId(childUser.getUserRole());
+                    childUserData.setWalletBalance(userWalletDAO.getBalanceByUserId(childUser.getId()));
+                    childUserDatas.add(childUserData);
+                }
+                userData.setChilduserIds(childUserDatas);
             }
-            userData.setChilduserIds(childUserDatas);
+
+
             return userData;
         }catch(Exception e){
             e.printStackTrace();
